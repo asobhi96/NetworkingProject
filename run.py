@@ -4,13 +4,14 @@ def run(socket):
 	message_queues = {}
 	message_queues[socket] = queue.Queue()
 	message_queues[sys.stdout] = queue.Queue()
-	inpt = [sys.stdin,socket]
+	standard_input = sys.stdin
+	inpt = [standard_input,socket]
 	output = []
 	error = []
 	while socket in inpt:
 		r,w,e = select.select(inpt,output,error)
 		for file in r:
-			if file == sys.stdin:
+			if file == standard_input:
 				#if file to be read from is stdin, need to readfrom stdin and tell socket to send data
 				message_queues[socket].put(file.readline().strip())
 				if socket not in output:
