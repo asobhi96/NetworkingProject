@@ -19,7 +19,7 @@ class App(tk.Frame):
         self.message_buffer.pack()
         self.send_button = tk.Button(self.lower_frame,text="Send",command=self.send_message)
         self.send_button.pack(side=tk.LEFT)
-        self.quit_button = tk.Button(self.lower_frame,text="Close",command=master.destroy)
+        self.quit_button = tk.Button(self.lower_frame,text="Close",command=self.close_connection)
         self.quit_button.pack(side=tk.RIGHT)
 
     def set_up_socket(self,is_host):
@@ -30,26 +30,28 @@ class App(tk.Frame):
             self.connection = client.createClientSocket(target_ip)
         self.message_queue= queue.Queue()
 
+    def close_connection(self):
+        self.connection.close()
+        self.master.destroy()
+
+
     def read_message(self):
         socket = self.connection
-        try:
-            r,_,_ = select.select([socket],[],[],.01)
-            if socket in r:
-                data = socket.recv(64).decode('ascii')
-                if data:
-                    self.chat_log.insert(tk.END,"Peer:" + data)
-                else:
-                    exit(-1)
-                    socket.close()
-            try:
-                next_message = self.message_queue.get_nowait()
-            except queue.Empty:
-                pass
+        r,_,_ = select.select([socket],[],[],.01)
+        if socket in r:
+            data = socket.recv(64).decode('ascii')
+            if data:
+                self.chat_log.insert(tk.END,"Peer:" + data)
             else:
-                socket.sendall(next_message.encode('ascii'))
-            self.master.after(1,self.read_message)
-        except ValueError:
-            socket.close()
+                socket.close()
+                self.master.destroy()
+        try:
+            next_message = self.message_queue.get_nowait()
+        except queue.Empty:
+            pass
+        else:
+            socket.sendall(next_message.encode('ascii'))
+        self.master.after(1,self.read_message)
 
     def send_message(self):
         buf = self.message_buffer.get(1.0,tk.END)
