@@ -14,6 +14,7 @@ class App(tk.Frame):
         self.lower_frame = tk.Frame(master)
         self.lower_frame.pack()
         self.chat_log = tk.Text(self.upper_frame)
+        self.chat_log.config(state=tk.DISABLED)
         self.chat_log.pack()
         self.message_buffer = tk.Text(self.lower_frame)
         self.message_buffer.pack()
@@ -41,7 +42,7 @@ class App(tk.Frame):
         if socket in r:
             data = socket.recv(64).decode('ascii')
             if data:
-                self.chat_log.insert(tk.END,"Peer:" + data)
+                self.insert_to_chat_log(data,"Peer")
             else:
                 socket.close()
                 self.master.destroy()
@@ -58,4 +59,9 @@ class App(tk.Frame):
         if len(buf) > 1:
             self.message_queue.put(buf)
             self.message_buffer.delete(1.0,tk.END)
-            self.chat_log.insert(tk.END,"You:" + buf)
+            self.insert_to_chat_log(buf,"You")
+
+    def insert_to_chat_log(self,message,owner_name):
+        self.chat_log.config(state=tk.NORMAL)
+        self.chat_log.insert(tk.END,"{}: {}".format(owner_name,message))
+        self.chat_log.config(state=tk.DISABLED)
