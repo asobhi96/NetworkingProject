@@ -4,9 +4,9 @@ import server,client
 
 class App(tk.Frame):
     def __init__(self,is_host,master=None):
-        super().__init__(master)
-        self.create_widgets(master)
+        self.master=master
         self.set_up_socket(is_host)
+        self.create_widgets(master)
 
     def create_widgets(self,master):
         self.upper_frame = tk.Frame(master)
