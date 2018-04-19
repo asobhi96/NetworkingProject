@@ -62,7 +62,7 @@ class App(tk.Frame):
 
     def send_message(self,event=None):
         buf = self.message_buffer.get()
-        if len(buf) > 1:
+        if len(buf) > 0:
             self.message_queue.put(buf)
             self.message_buffer.delete(0,tk.END)
             self.insert_to_chat_log(buf,"You")
